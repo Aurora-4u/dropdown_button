@@ -8,6 +8,7 @@
 */
 
 import 'dart:math' as math;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -115,6 +116,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
     required this.mediaQueryPadding,
     required this.itemIndex,
     required this.enableFeedback,
+    this.isCupertinoStyle,
   });
 
   final _DropdownRoute<T> route;
@@ -124,6 +126,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   final EdgeInsets mediaQueryPadding;
   final int itemIndex;
   final bool enableFeedback;
+  final bool? isCupertinoStyle;
 
   @override
   _DropdownMenuItemButtonState<T> createState() => _DropdownMenuItemButtonState<T>();
@@ -195,12 +198,15 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
           : menuItemStyle.customHeights![widget.itemIndex],
       child: widget.route.items[widget.itemIndex],
     );
+
+
     // An [InkWell] is added to the item only if it is enabled
     // isNoSelectedItem to avoid first item highlight when no item selected
     if (dropdownMenuItem.enabled) {
       final bool isSelectedItem =
           !widget.route.isNoSelectedItem && widget.itemIndex == widget.route.selectedIndex;
-      child = InkWell(
+
+      Widget item = InkWell(
         autofocus: isSelectedItem,
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
@@ -210,6 +216,17 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
             ? menuItemStyle.selectedMenuItemBuilder?.call(context, child) ?? child
             : child,
       );
+
+      if (widget.isCupertinoStyle ?? false) {
+        item = CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _handleOnTap,
+          child: isSelectedItem
+            ? menuItemStyle.selectedMenuItemBuilder?.call(context, child) ?? child
+            : child,
+        );
+      }
+      child = item;
     }
     child = FadeTransition(opacity: opacity, child: child);
     if (kIsWeb && dropdownMenuItem.enabled) {
@@ -231,6 +248,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     required this.constraints,
     required this.mediaQueryPadding,
     required this.enableFeedback,
+    this.isCupertinoStyle,
   });
 
   final _DropdownRoute<T> route;
@@ -239,6 +257,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final BoxConstraints constraints;
   final EdgeInsets mediaQueryPadding;
   final bool enableFeedback;
+  final bool? isCupertinoStyle;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -253,7 +272,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
   DropdownStyleData get dropdownStyle => widget.route.dropdownStyle;
 
   DropdownSearchData<T>? get searchData => widget.route.searchData;
-
+  
   @override
   void initState() {
     super.initState();
@@ -271,6 +290,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
       curve: dropdownStyle.openInterval,
       reverseCurve: const Threshold(0.0),
     );
+
     //If searchController is null, then it'll perform as a normal dropdown
     //and search functions will not be executed.
     if (searchData?.searchController == null) {
@@ -284,6 +304,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             mediaQueryPadding: widget.mediaQueryPadding,
             itemIndex: index,
             enableFeedback: widget.enableFeedback,
+            isCupertinoStyle: widget.isCupertinoStyle,
           ),
       ];
     } else {
@@ -312,6 +333,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             mediaQueryPadding: widget.mediaQueryPadding,
             itemIndex: index,
             enableFeedback: widget.enableFeedback,
+            isCupertinoStyle: widget.isCupertinoStyle,
           ),
     ];
   }
@@ -587,6 +609,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.dropdownStyle,
     required this.menuItemStyle,
     required this.searchData,
+    this.isCupertinoStyle,
   }) : itemHeights =
             menuItemStyle.customHeights ?? List<double>.filled(items.length, menuItemStyle.height);
 
@@ -600,6 +623,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final DropdownStyleData dropdownStyle;
   final MenuItemStyleData menuItemStyle;
   final DropdownSearchData<T>? searchData;
+  final bool? isCupertinoStyle;
 
   final List<double> itemHeights;
   ScrollController? scrollController;
@@ -642,6 +666,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
               capturedThemes: capturedThemes,
               style: style,
               enableFeedback: enableFeedback,
+              isCupertinoStyle: isCupertinoStyle,
             );
           },
         );
@@ -765,6 +790,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     required this.capturedThemes,
     this.style,
     required this.enableFeedback,
+    this.isCupertinoStyle,
   });
 
   final _DropdownRoute<T> route;
@@ -776,6 +802,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final CapturedThemes capturedThemes;
   final TextStyle? style;
   final bool enableFeedback;
+  final bool? isCupertinoStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -805,6 +832,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       constraints: constraints,
       mediaQueryPadding: mediaQueryPadding,
       enableFeedback: enableFeedback,
+      isCupertinoStyle: isCupertinoStyle,
     );
 
     return MediaQuery.removePadding(
@@ -964,6 +992,7 @@ class DropdownButton2<T> extends StatefulWidget {
     this.selectedItemBuilder,
     this.value,
     this.hint,
+    this.isCupertinoStyle,
     this.disabledHint,
     this.onChanged,
     this.onMenuStateChange,
@@ -1017,6 +1046,7 @@ class DropdownButton2<T> extends StatefulWidget {
     this.selectedItemBuilder,
     this.value,
     this.hint,
+    this.isCupertinoStyle,
     this.disabledHint,
     required this.onChanged,
     this.onMenuStateChange,
@@ -1108,6 +1138,8 @@ class DropdownButton2<T> extends StatefulWidget {
   /// If [value] is null and the dropdown is disabled and [disabledHint] is null,
   /// this widget is used as the placeholder.
   final Widget? hint;
+
+  final bool? isCupertinoStyle;
 
   /// A preferred placeholder widget that is displayed when the dropdown is disabled.
   ///
@@ -1415,6 +1447,7 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>> with WidgetsBind
       dropdownStyle: _dropdownStyle,
       menuItemStyle: _menuItemStyle,
       searchData: _searchData,
+      isCupertinoStyle: widget.isCupertinoStyle,
     );
 
     _isMenuOpen.value = true;
@@ -1659,22 +1692,35 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>> with WidgetsBind
       );
     }
 
+    Widget resultButton = InkWell(
+      mouseCursor: effectiveMouseCursor,
+      onTap: _enabled && !widget.openWithLongPress ? _handleTap : null,
+      onLongPress: _enabled && widget.openWithLongPress ? _handleTap : null,
+      canRequestFocus: _enabled,
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      overlayColor: _buttonStyle?.overlayColor,
+      enableFeedback: false,
+      borderRadius: _getButtonBorderRadius(context),
+      child: result,
+    );
+
+    if (widget.isCupertinoStyle ?? false) {
+      resultButton = Container(
+        decoration: widget.buttonStyleData?.decoration,
+        child:CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _enabled && !widget.openWithLongPress ? _handleTap : null,
+          child: result,
+        )
+      );
+    }
+
     return Semantics(
       button: true,
       child: Actions(
         actions: _actionMap,
-        child: InkWell(
-          mouseCursor: effectiveMouseCursor,
-          onTap: _enabled && !widget.openWithLongPress ? _handleTap : null,
-          onLongPress: _enabled && widget.openWithLongPress ? _handleTap : null,
-          canRequestFocus: _enabled,
-          focusNode: _focusNode,
-          autofocus: widget.autofocus,
-          overlayColor: _buttonStyle?.overlayColor,
-          enableFeedback: false,
-          borderRadius: _getButtonBorderRadius(context),
-          child: result,
-        ),
+        child: resultButton
       ),
     );
   }
@@ -1712,6 +1758,7 @@ class DropdownButtonFormField2<T> extends FormField<T> {
     T? value,
     Widget? hint,
     Widget? disabledHint,
+    bool? isCupertinoStyle,
     this.onChanged,
     OnMenuStateChangeFn? onMenuStateChange,
     TextStyle? style,
@@ -1787,6 +1834,7 @@ class DropdownButtonFormField2<T> extends FormField<T> {
                       selectedItemBuilder: selectedItemBuilder,
                       value: state.value,
                       hint: hint,
+                      isCupertinoStyle: isCupertinoStyle,
                       disabledHint: disabledHint,
                       onChanged: onChanged == null ? null : state.didChange,
                       onMenuStateChange: onMenuStateChange,

@@ -218,12 +218,15 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       );
 
       if (widget.isCupertinoStyle ?? false) {
-        item = CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _handleOnTap,
-          child: isSelectedItem
-            ? menuItemStyle.selectedMenuItemBuilder?.call(context, child) ?? child
-            : child,
+        item = Container(
+          height: menuItemStyle.height,
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _handleOnTap,
+            child: isSelectedItem
+              ? menuItemStyle.selectedMenuItemBuilder?.call(context, child) ?? child
+              : child,
+          )
         );
       }
       child = item;
@@ -1708,7 +1711,8 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>> with WidgetsBind
     if (widget.isCupertinoStyle ?? false) {
       resultButton = Container(
         decoration: widget.buttonStyleData?.decoration,
-        child:CupertinoButton(
+        height: widget.buttonStyleData?.height,
+        child: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _enabled && !widget.openWithLongPress ? _handleTap : null,
           child: result,

@@ -113,6 +113,7 @@ class DropdownStyleData {
     this.useRootNavigator = false,
     this.scrollbarTheme,
     this.openInterval = const Interval(0.25, 0.5),
+    this.expandFrom = "topLeft",
   });
 
   /// The maximum height of the dropdown menu
@@ -137,6 +138,8 @@ class DropdownStyleData {
 
   /// The decoration of the dropdown menu
   final BoxDecoration? decoration;
+
+  final String? expandFrom;
 
   /// The z-coordinate at which to place the menu when open.
   ///

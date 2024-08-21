@@ -49,7 +49,9 @@ class _DropdownMenuPainter extends CustomPainter {
     this.selectedIndex,
     required this.resize,
     required this.itemHeight,
+    required this.itemWidth,
     this.dropdownDecoration,
+    this.expandFrom,
   })  : _painter = dropdownDecoration
                 ?.copyWith(
                   color: dropdownDecoration.color ?? color,
@@ -71,7 +73,9 @@ class _DropdownMenuPainter extends CustomPainter {
   final int? selectedIndex;
   final Animation<double> resize;
   final double itemHeight;
+  final double itemWidth;
   final BoxDecoration? dropdownDecoration;
+  final String? expandFrom;
 
   final BoxPainter _painter;
 
@@ -83,15 +87,19 @@ class _DropdownMenuPainter extends CustomPainter {
       begin: 0.0,
       end: 0.0,
     );
-
     final Tween<double> bottom = Tween<double>(
       begin: _clampDouble(top.begin! + itemHeight, math.min(itemHeight, size.height), size.height),
       end: size.height,
     );
+    Rect rect = Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
+    Offset paintOffset = rect.topLeft;
 
-    final Rect rect = Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
+    if (expandFrom == "bottomRight") {
+      rect = Rect.fromLTRB(size.width, bottom.evaluate(resize), 0.0, top.evaluate(resize));
+      paintOffset = Offset(size.width, size.height);
+    }
 
-    _painter.paint(canvas, rect.topLeft, ImageConfiguration(size: rect.size));
+    _painter.paint(canvas, paintOffset, ImageConfiguration(size: rect.size));
   }
 
   @override
@@ -101,6 +109,7 @@ class _DropdownMenuPainter extends CustomPainter {
         oldPainter.selectedIndex != selectedIndex ||
         oldPainter.dropdownDecoration != dropdownDecoration ||
         oldPainter.itemHeight != itemHeight ||
+        oldPainter.itemWidth != itemWidth ||
         oldPainter.resize != resize;
   }
 }
@@ -310,6 +319,10 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             isCupertinoStyle: widget.isCupertinoStyle,
           ),
       ];
+      if (dropdownStyle.expandFrom == 'bottomRight') {
+        _children =_children.reversed.toList();
+      }
+
     } else {
       _searchMatchFn = searchData?.searchMatchFn ?? _defaultSearchMatchFn();
       _children = _getSearchItems();
@@ -417,7 +430,9 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           selectedIndex: route.selectedIndex,
           resize: _resize,
           itemHeight: route.menuItemStyle.height,
+          itemWidth: dropdownStyle.width ?? 100,
           dropdownDecoration: dropdownStyle.decoration,
+          expandFrom: dropdownStyle.expandFrom,
         ),
         child: Semantics(
           scopesRoute: true,
